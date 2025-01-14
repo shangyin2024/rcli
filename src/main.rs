@@ -26,3 +26,9 @@ fn main() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+// test
+#[test]
+fn test() {
+    println!("test");
+}
