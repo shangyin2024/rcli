@@ -1,21 +1,8 @@
+use super::verify_input_file;
 use core::fmt;
-use std::{path::Path, str::FromStr};
+use std::str::FromStr;
 
-use clap::{Args, Parser, Subcommand};
-#[derive(Parser, Debug)]
-#[command(name = "rcli", version, about, long_about = None)]
-pub struct Opts {
-    #[command(subcommand)]
-    pub command: Commands,
-}
-
-#[derive(Subcommand, Debug)]
-pub enum Commands {
-    #[command(name = "csv", about = "Show Csv,or covert VSC to other formats")]
-    Csv(CsvOpts),
-    #[command(name = "genpass", about = "Generate a random password")]
-    GenPass(GenPassOpts),
-}
+use clap::Args;
 
 #[derive(Debug, Clone, Copy)]
 pub enum OutputFormat {
@@ -40,36 +27,6 @@ pub struct CsvOpts {
 
     #[arg(long, default_value_t = true)]
     pub header: bool,
-}
-
-#[derive(Args, Debug)]
-pub struct GenPassOpts {
-    #[arg(short, long, default_value_t = 16)]
-    pub length: u8,
-
-    #[arg(long, default_value_t = true)]
-    pub number: bool,
-
-    #[arg(long, default_value_t = true)]
-    pub symbol: bool,
-
-    #[arg(long, default_value_t = true)]
-    pub lowercase: bool,
-
-    #[arg(long, default_value_t = true)]
-    pub uppercase: bool,
-}
-
-fn verify_input_file(input_file: &str) -> Result<String, &'static str> {
-    // 判断文件是否存在
-    if !Path::new(input_file).exists() {
-        return Err("Input file does not exist");
-    }
-
-    if input_file.is_empty() {
-        return Err("Input file is required");
-    }
-    Ok(input_file.into())
 }
 
 // 将字符串解析为 OutputFormat 枚举
