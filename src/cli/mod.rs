@@ -1,37 +1,52 @@
+mod base64;
 mod csv;
 mod genpass;
+mod text;
 
-use std::path::Path;
-
-use clap::{Parser, Subcommand};
+use std::path::{Path, PathBuf};
 
 use self::{csv::CsvOpts, genpass::GenPassOpts};
+use clap::Parser;
 
-pub use self::csv::OutputFormat;
-
+pub use self::{
+    base64::{Base64Format, Base64Subcommand},
+    csv::OutputFormat,
+    text::{TextSignFormat, TextSubCommand},
+};
 #[derive(Parser, Debug)]
 #[command(name = "rcli", version, about, long_about = None)]
 pub struct Opts {
     #[command(subcommand)]
-    pub command: Commands,
+    pub cmd: Commands,
 }
 
-#[derive(Subcommand, Debug)]
+#[derive(Parser, Debug)]
 pub enum Commands {
-    #[command(name = "csv", about = "Show Csv,or covert VSC to other formats")]
+    #[command(name = "csv", about = "Show Csv,or covert CSV to other formats")]
     Csv(CsvOpts),
     #[command(name = "genpass", about = "Generate a random password")]
     GenPass(GenPassOpts),
+    #[command(subcommand, about = "Base64 encode/decode")]
+    Base64(Base64Subcommand),
+    #[command(subcommand, about = "Text sign/verify")]
+    Text(TextSubCommand),
 }
 
-fn verify_input_file(input_file: &str) -> Result<String, &'static str> {
-    // 判断文件是否存在
-    if !Path::new(input_file).exists() {
-        return Err("Input file does not exist");
+fn verify_file(filename: &str) -> Result<String, &'static str> {
+    // if input is "-" or file exists
+    if filename == "-" || Path::new(filename).exists() {
+        Ok(filename.into())
+    } else {
+        Err("File does not exist")
     }
+}
 
-    if input_file.is_empty() {
-        return Err("Input file is required");
+fn verify_path(path: &str) -> Result<PathBuf, &'static str> {
+    // if input is "-" or file exists
+    let p = Path::new(path);
+    if p.exists() && p.is_dir() {
+        Ok(path.into())
+    } else {
+        Err("Path does not exist or is not a directory")
     }
-    Ok(input_file.into())
 }
